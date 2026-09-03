@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { prefersReducedMotion } from "./mediaFlags";
+import { useEffect } from 'react';
+import { prefersReducedMotion } from './mediaFlags';
 
 const FRAME_INTERVAL = 25;
 const LINE_ALPHA_BUCKETS = 8;
@@ -13,22 +13,28 @@ export function useHeroParticles(canvasRef) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
 
     let particles = [];
     const lineBucketPaths = new Array(LINE_ALPHA_BUCKETS).fill(null);
     let rafId = null;
     let docHeight = 0;
     const mouse = { x: null, y: null };
-    let accentRGB = "239, 68, 68";
+    let accentRGB = '239, 68, 68';
     let alphas = { dot: 0.55, line: 0.3 };
+    // The canvas is a full-viewport fixed layer that redraws every frame
+    // forever, even long after the hero has been scrolled past — that's
+    // wasted main-thread work fighting the browser's scroll rendering.
+    // Track whether the hero is actually on screen and pause the loop when
+    // it isn't.
+    let heroInView = true;
 
     const refreshThemeCache = () => {
       const styles = getComputedStyle(document.documentElement);
-      accentRGB = styles.getPropertyValue("--red-rgb").trim() || "239, 68, 68";
+      accentRGB = styles.getPropertyValue('--red-rgb').trim() || '239, 68, 68';
       alphas = {
-        dot: parseFloat(styles.getPropertyValue("--particle-dot-alpha")) || 0.55,
-        line: parseFloat(styles.getPropertyValue("--particle-line-alpha")) || 0.3,
+        dot: parseFloat(styles.getPropertyValue('--particle-dot-alpha')) || 0.55,
+        line: parseFloat(styles.getPropertyValue('--particle-line-alpha')) || 0.3,
       };
     };
 
@@ -65,12 +71,12 @@ export function useHeroParticles(canvasRef) {
     const themeObserver = new MutationObserver(refreshThemeCache);
     themeObserver.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["data-theme", "data-mode"],
+      attributeFilter: ['data-theme', 'data-mode'],
     });
 
     let lastFrame = 0;
 
-    const step = (now) => {
+    const step = now => {
       if (now - lastFrame < FRAME_INTERVAL) {
         if (!prefersReducedMotion && !document.hidden) rafId = requestAnimationFrame(step);
         return;
@@ -80,7 +86,7 @@ export function useHeroParticles(canvasRef) {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
-      particles.forEach((p) => {
+      particles.forEach(p => {
         if (prefersReducedMotion) return;
         p.x += p.vx;
         p.y += p.vy;
@@ -99,7 +105,7 @@ export function useHeroParticles(canvasRef) {
       });
 
       const visible = particles
-        .filter((p) => {
+        .filter(p => {
           const y = p.y - scrollTop;
           return y > -150 && y < window.innerHeight + 150;
         })
@@ -116,10 +122,13 @@ export function useHeroParticles(canvasRef) {
           const dist = Math.hypot(dx, dy);
           if (dist < 170) {
             const depth = (visible[i].depth + visible[j].depth) / 2;
-            const strength = ((1 - dist / 170) * alphas.line) * depth;
+            const strength = (1 - dist / 170) * alphas.line * depth;
             const bucket = Math.max(
               0,
-              Math.min(LINE_ALPHA_BUCKETS - 1, Math.round((strength / alphas.line) * (LINE_ALPHA_BUCKETS - 1)))
+              Math.min(
+                LINE_ALPHA_BUCKETS - 1,
+                Math.round((strength / alphas.line) * (LINE_ALPHA_BUCKETS - 1))
+              )
             );
             let path = lineBuckets[bucket];
             if (!path) {
@@ -141,17 +150,20 @@ export function useHeroParticles(canvasRef) {
         ctx.stroke(path);
       }
 
-      visible.forEach((p) => {
+      visible.forEach(p => {
         ctx.fillStyle = `rgba(${accentRGB}, ${(alphas.dot * p.depth).toFixed(3)})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y - scrollTop, 1.5 * p.depth, 0, 2 * Math.PI);
         ctx.fill();
       });
 
-      if (!prefersReducedMotion && !document.hidden) rafId = requestAnimationFrame(step);
+      if (!prefersReducedMotion && !document.hidden && heroInView) {
+        rafId = requestAnimationFrame(step);
+      }
     };
 
     const start = () => {
+      if (!heroInView) return;
       if (!rafId || prefersReducedMotion) step(performance.now());
     };
     const stop = () => {
@@ -161,22 +173,22 @@ export function useHeroParticles(canvasRef) {
       }
     };
 
-    const onPointerMove = (e) => {
+    const onPointerMove = e => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
     };
-    const onMouseOut = (e) => {
+    const onMouseOut = e => {
       if (!e.relatedTarget) {
         mouse.x = null;
         mouse.y = null;
       }
     };
 
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("mouseout", onMouseOut);
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('mouseout', onMouseOut);
 
     sizeCanvas();
-    canvas.classList.add("is-active");
+    canvas.classList.add('is-active');
     start();
 
     let resizeTimer = null;
@@ -184,11 +196,11 @@ export function useHeroParticles(canvasRef) {
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(sizeCanvas, 150);
     };
-    window.addEventListener("resize", onResize);
-    window.addEventListener("load", refreshDocHeight);
+    window.addEventListener('resize', onResize);
+    window.addEventListener('load', refreshDocHeight);
 
     let resizeObserver = null;
-    if ("ResizeObserver" in window) {
+    if ('ResizeObserver' in window) {
       resizeObserver = new ResizeObserver(refreshDocHeight);
       resizeObserver.observe(document.body);
     }
@@ -197,17 +209,32 @@ export function useHeroParticles(canvasRef) {
       if (document.hidden) stop();
       else start();
     };
-    document.addEventListener("visibilitychange", onVisibilityChange);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    const heroEl = document.getElementById('home');
+    let heroObserver = null;
+    if (heroEl && 'IntersectionObserver' in window) {
+      heroObserver = new IntersectionObserver(
+        ([entry]) => {
+          heroInView = entry.isIntersecting;
+          if (heroInView) start();
+          else stop();
+        },
+        { rootMargin: '200px 0px 200px 0px' }
+      );
+      heroObserver.observe(heroEl);
+    }
 
     return () => {
       stop();
       themeObserver.disconnect();
       resizeObserver?.disconnect();
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("mouseout", onMouseOut);
-      window.removeEventListener("resize", onResize);
-      window.removeEventListener("load", refreshDocHeight);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
+      heroObserver?.disconnect();
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('mouseout', onMouseOut);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('load', refreshDocHeight);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       clearTimeout(resizeTimer);
     };
   }, [canvasRef]);
