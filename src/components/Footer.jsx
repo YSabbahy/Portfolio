@@ -6,7 +6,7 @@ export default function Footer() {
         <span>
           © <span id="year">{year}</span> Youssef Sabbahy. All rights reserved.
         </span>
-        <span>Built with HTML, Tailwind CSS &amp; a lot of easing curves.</span>
+        <span>Built with React, Tailwind CSS &amp; a lot of easing curves.</span>
       </div>
     </footer>
   );
