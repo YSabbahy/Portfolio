@@ -8,6 +8,6 @@ export default function Footer() {
         </span>
         <span>Built with React, Tailwind CSS &amp; a lot of easing curves.</span>
       </div>
-    </footer>
+    </footer> 
   );
 }
