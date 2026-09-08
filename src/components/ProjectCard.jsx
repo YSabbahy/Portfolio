@@ -24,7 +24,15 @@ export default function ProjectCard({ project, registerRef, featured = false }) 
         rel="noopener noreferrer"
         target="_blank"
       >
-        <div className="project-media">
+        <div
+          className="project-media"
+          style={{
+            aspectRatio:
+              project.width && project.height
+                ? `${project.width} / ${project.height}`
+                : "16 / 9",
+          }}
+        >
           <img
             alt={project.imageAlt}
             decoding="async"
