@@ -220,8 +220,8 @@ html[data-theme=blue]{cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www
 }
 @keyframes hgFadeIn{to{opacity:1}}
 .hg-decode.is-decoding{
-  color:#c9a227;
-  text-shadow:0 0 16px rgba(201,162,39,.4);
+  color: var(--red);
+  text-shadow: 0 0 16px rgba(var(--red-rgb), .4);
 }
 
 /* ==========================================================================
