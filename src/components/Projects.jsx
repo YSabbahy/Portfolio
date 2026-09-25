@@ -1,13 +1,22 @@
-import { useRef } from "react";
+import { useMemo, useState } from "react";
 import { PROJECTS } from "../data/projects";
 import { useProjectGridStagger } from "../hooks/useProjectGridStagger";
 import Reveal from "./Reveal";
 import ProjectCard from "./ProjectCard";
 
+const FILTERS = ["All", "E-commerce", "React", "Landing Page", "Interactive"];
+
 export default function Projects() {
-  const cardRefs = useRef([]);
-  const gridRef = useProjectGridStagger(cardRefs);
-  const [featuredProject, ...otherProjects] = PROJECTS;
+  const [activeFilter, setActiveFilter] = useState("All");
+  // Re-runs whenever the filter changes so freshly-rendered cards get revealed.
+  const gridRef = useProjectGridStagger(activeFilter);
+
+  const filtered = useMemo(() => {
+    if (activeFilter === "All") return PROJECTS;
+    return PROJECTS.filter((project) => project.tags.includes(activeFilter));
+  }, [activeFilter]);
+
+  const [featuredProject, ...otherProjects] = filtered;
 
   return (
     <section
@@ -15,36 +24,53 @@ export default function Projects() {
       data-index="02"
       id="projects"
     >
-      <Reveal className="mb-14">
+      <Reveal className="mb-6">
         <span className="section-eyebrow">Selected Work</span>
         <h2 className="font-display text-3xl sm:text-4xl font-bold text-white mt-3">Projects</h2>
         <p className="text-gray-400 mt-3 max-w-xl">
-          A handful of front-end builds — from full e-commerce flows to concept-driven landing
-          experiences.
+          Four real front-end builds — from full e-commerce flows to a concept-driven landing
+          page. Every project has a full case study.
         </p>
-      </Reveal>
-      <div className="project-grid" ref={gridRef}>
-        <div className="project-featured-row">
-          <ProjectCard
-            featured
-            project={featuredProject}
-            registerRef={(node) => {
-              cardRefs.current[0] = node;
-            }}
-          />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {otherProjects.map((project, index) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              registerRef={(node) => {
-                cardRefs.current[index + 1] = node;
-              }}
-            />
+        <div className="filter-row" role="group" aria-label="Filter projects by category">
+          {FILTERS.map((filter) => (
+            <button
+              key={filter}
+              type="button"
+              className={`filter-chip${activeFilter === filter ? " is-active" : ""}`}
+              onClick={() => setActiveFilter(filter)}
+              aria-pressed={activeFilter === filter}
+            >
+              {filter}
+            </button>
           ))}
         </div>
-      </div>
+      </Reveal>
+      <p className="sr-only" role="status">
+        Showing {filtered.length} {filtered.length === 1 ? "project" : "projects"}
+        {activeFilter === "All" ? "" : ` in ${activeFilter}`}
+      </p>
+      {featuredProject ? (
+        // `key` gives each filter a brand-new grid, so no card DOM node (and no
+        // leftover `is-in` class / tilt transform) is ever reused for a
+        // different project when the filter changes.
+        <div className="project-grid" key={activeFilter} ref={gridRef}>
+          <div className="project-featured-row">
+            <ProjectCard featured project={featuredProject} />
+          </div>
+          {otherProjects.length > 0 && (
+            <div
+              className="project-others"
+              style={{ "--cols": Math.min(otherProjects.length, 3) }}
+            >
+              {otherProjects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <p className="text-gray-500 text-sm mt-10">No projects in this category yet.</p>
+      )}
       <Reveal className="mt-10 text-center">
         <a
           className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors font-mono"

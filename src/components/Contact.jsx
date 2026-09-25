@@ -5,7 +5,7 @@ export default function Contact() {
   return (
     <section
       className="section-block px-6 md:px-16 max-w-7xl mx-auto relative z-10 py-16 sm:py-20 md:py-28"
-      data-index="04"
+      data-index="09"
       id="contact"
     >
       <Reveal className="contact-panel">

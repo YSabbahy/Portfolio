@@ -15,6 +15,19 @@ export const PROJECTS = [
     tags: ["CSS3", "JavaScript", "Interactive"],
   },
   {
+    id: "racecore",
+    name: "RaceCore",
+    liveUrl: "https://ysabbahy.github.io/Racecore/",
+    codeUrl: "https://github.com/YSabbahy/Racecore",
+    image: `${BASE}images/racecore-thumb.webp`,
+    imageAlt: "RaceCore — superbikes and racing gear e-commerce storefront",
+    width: 1365,
+    height: 627,
+    description:
+      "A fully-wired React storefront for superbikes and racing gear — full catalog with filtering and search, product pages, cart, checkout, wishlist and demo account flows, built with Vite, Tailwind and React Router.",
+    tags: ["React", "Vite", "Tailwind CSS", "React Router", "E-commerce"],
+  },
+  {
     id: "essence",
     name: "Essence",
     liveUrl: "https://ysabbahy.github.io/Essence-project/",
@@ -26,19 +39,6 @@ export const PROJECTS = [
     description:
       "A full luxury fragrance storefront — product catalog, dark mode, cart, checkout flow and auth pages, built as a cohesive multi-page e-commerce experience.",
     tags: ["HTML5", "CSS3", "E-commerce"],
-  },
-  {
-    id: "racecore",
-    name: "RaceCore",
-    liveUrl: "https://ysabbahy.github.io/Racecore/",
-    codeUrl: "https://github.com/YSabbahy/Racecore",
-    image: `${BASE}images/racecore-thumb.webp`,
-    imageAlt: "RaceCore — superbike and racing gear e-commerce storefront",
-    width: 1365,
-    height: 720,
-    description:
-      "A fully-wired React storefront for superbikes and racing gear — full catalog with filtering and search, product pages, cart, checkout, wishlist and account flows, built with Vite, Tailwind and React Router.",
-    tags: ["React", "Vite", "Tailwind CSS", "E-commerce"],
   },
   {
     id: "orbitax",

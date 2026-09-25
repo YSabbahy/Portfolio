@@ -4,6 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#030303" />
+    <script>
+      // Apply the saved light/dark mode and accent colour BEFORE first paint so
+      // returning visitors never see a flash of the default dark theme.
+      (function () {
+        try {
+          var root = document.documentElement;
+          if (localStorage.getItem("portfolioMode") === "light") root.setAttribute("data-mode", "light");
+          var t = localStorage.getItem("portfolioTheme");
+          if (t === "green" || t === "blue") root.setAttribute("data-theme", t);
+        } catch (e) {
+          /* storage blocked — defaults apply */
+        }
+      })();
+    </script>
+    <script type="text/javascript">
+      // GitHub Pages SPA routing fix — decodes the redirect from 404.html
+      // so deep links (e.g. /project/racecore) and page refreshes work.
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(null, null, l.pathname.slice(0, -1) + decoded + l.hash);
+        }
+      })(window.location);
+    </script>
     <meta
       name="description"
       content="Youssef Sabbahy — front-end developer building web interfaces with React, Tailwind CSS and deliberate motion design."

@@ -1,18 +1,19 @@
 {
   "name": "Youssef Sabbahy — Front-end Developer",
   "short_name": "Y. Sabbahy",
-  "start_url": "/",
+  "start_url": "/Portfolio/",
+  "scope": "/Portfolio/",
   "display": "standalone",
   "background_color": "#030303",
   "theme_color": "#030303",
   "icons": [
     {
-      "src": "/apple-touch-icon.png",
+      "src": "/Portfolio/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/Portfolio/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }

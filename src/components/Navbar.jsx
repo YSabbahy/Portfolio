@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { NAV_LINKS } from "../data/nav";
 import { useActiveSection } from "../hooks/useActiveSection";
 import { useClickSound } from "../hooks/useClickSound";
@@ -10,6 +11,8 @@ export default function Navbar() {
   const activeSection = useActiveSection();
   const playClick = useClickSound();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { pathname } = useLocation();
+  const isHome = pathname === "/";
 
   const containerRef = useRef(null);
   const beamRef = useRef(null);
@@ -31,8 +34,8 @@ export default function Navbar() {
     <>
       <nav className="floating-nav">
         <div className="logo">
-          <a
-            href="#home"
+          <Link
+            to="/"
             className="font-display text-base font-bold no-underline tracking-tight flex items-center gap-1 group"
           >
             <span className="logo-text">
@@ -41,19 +44,19 @@ export default function Navbar() {
                 &gt;
               </span>
             </span>
-          </a>
+          </Link>
         </div>
         <div
-          className="nav-links-container hidden md:flex items-center"
+          className="nav-links-container hidden lg:flex items-center"
           id="navContainer"
           ref={containerRef}
           onMouseLeave={onContainerMouseLeave}
         >
           <div className="nav-beam-pill" id="beamPill" ref={beamRef} />
           {NAV_LINKS.map((link, index) => (
-            <a
+            <Link
               key={link.section}
-              href={`#${link.section}`}
+              to={isHome ? `#${link.section}` : `/#${link.section}`}
               className={`nav-link${activeSection === link.section ? " is-active" : ""}`}
               data-section={link.section}
               ref={(el) => {
@@ -63,14 +66,22 @@ export default function Navbar() {
               onClick={playClick}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="cmdk-trigger hidden sm:inline-flex"
+            aria-label="Open command palette"
+            onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
+          >
+            <span aria-hidden="true">⌘</span>K
+          </button>
           <ThemeSwitcher />
           <button
             type="button"
-            className="mobile-menu-btn md:hidden text-gray-300 hover:text-white transition-colors"
+            className="mobile-menu-btn lg:hidden text-gray-300 hover:text-white transition-colors"
             id="mobileMenuBtn"
             aria-label="Open menu"
             aria-expanded={mobileOpen}

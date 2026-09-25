@@ -1,18 +1,18 @@
 export const SKILL_GROUPS = [
   {
-    id: "languages",
-    title: "Languages & Markup",
-    items: ["HTML5", "CSS3", "JavaScript (ES6+)"],
+    id: "frontend",
+    title: "Frontend",
+    items: ["HTML5", "CSS3", "JavaScript (ES6+)", "React", "Tailwind CSS"],
   },
   {
-    id: "frameworks",
-    title: "Frameworks & Styling",
-    items: ["React", "Tailwind CSS", "Responsive Design"],
+    id: "tools",
+    title: "Tools & Ecosystem",
+    items: ["Vite", "React Router", "Git & GitHub"],
   },
   {
-    id: "craft",
-    title: "Craft & Tooling",
-    items: ["Motion & Micro-interactions", "Git & GitHub", "Cross-browser QA"],
+    id: "programming",
+    title: "Programming",
+    items: ["C++"],
   },
 ];
 

@@ -17,7 +17,7 @@ const GENERIC_SELECTOR = "a, button, input, textarea";
 /**
  * Drives the custom cursor dot + trailing ring, including per-element hover
  * states (view / button / link / generic hover). Implemented with a single
- * delegated `mouseover`/`mouseout` listener on `document`, which reproduces
+ * delegated `mouseover` listener on `document`, which reproduces
  * the original per-element listeners without needing a ref on every
  * interactive element across the page.
  */
@@ -38,6 +38,10 @@ export function useCursorEffects({ dotRef, ringRef, labelRef }) {
       ringX: window.innerWidth / 2,
       ringY: window.innerHeight / 2,
     };
+
+    // Park the dot at the same starting point as the ring (it previously sat at
+    // the top-left corner until the first mouse movement).
+    dot.style.transform = `translate(${posRef.current.x}px, ${posRef.current.y}px) translate(-50%, -50%)`;
 
     const onPointerMove = (e) => {
       posRef.current.x = e.clientX;
@@ -61,28 +65,23 @@ export function useCursorEffects({ dotRef, ringRef, labelRef }) {
       if (labelRef.current) labelRef.current.textContent = label || "";
     };
 
+    // Every hover re-derives the ring state from what is under the pointer,
+    // including "nothing interactive" -> reset. The old version only reset when
+    // leaving a button/link, so a stale "View"/hover ring could get stuck (e.g.
+    // after the command palette opened over a hovered project card).
     const onMouseOver = (e) => {
-      const target = e.target;
+      const target = e.target instanceof Element ? e.target : null;
+      if (!target) return;
       const rule = STATE_RULES.find(({ selector }) => target.closest(selector));
       if (rule) {
         setState(rule.state, rule.label);
       } else if (target.closest(GENERIC_SELECTOR)) {
         setState("is-hover", "");
-      }
-    };
-    const onMouseOut = (e) => {
-      const related = e.relatedTarget;
-      const target = e.target;
-      const stillMatches =
-        related &&
-        (STATE_RULES.some(({ selector }) => related.closest?.(selector)) ||
-          related.closest?.(GENERIC_SELECTOR));
-      if (target.closest(GENERIC_SELECTOR) && !stillMatches) {
+      } else {
         setState(null, "");
       }
     };
     document.addEventListener("mouseover", onMouseOver);
-    document.addEventListener("mouseout", onMouseOut);
 
     const onDocMouseLeave = () => {
       dot.style.opacity = "0";
@@ -98,7 +97,6 @@ export function useCursorEffects({ dotRef, ringRef, labelRef }) {
     return () => {
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("mouseover", onMouseOver);
-      document.removeEventListener("mouseout", onMouseOut);
       document.removeEventListener("mouseleave", onDocMouseLeave);
       document.removeEventListener("mouseenter", onDocMouseEnter);
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);

@@ -1,22 +1,33 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 /**
- * Watches the top-level `main[id]`/`section[id]` landmarks and reports which
- * one is currently in view, used to highlight the matching nav link.
+ * Watches the page sections inside <main> and reports which one is currently
+ * in view, used to highlight the matching nav link.
+ *
+ * Two bugs lived here before:
+ *  1. The selector was `main[id], section[id]`. <main id="main-content"> wraps
+ *     every section and always intersects the viewport, and it comes first in
+ *     document order — so "the topmost visible landmark" was ALWAYS
+ *     "main-content" and no nav link was ever highlighted. We now observe only
+ *     the sections inside <main>.
+ *  2. The effect ran once, on first mount. After visiting a case study and
+ *     returning Home, the Home sections are brand-new DOM nodes that the old
+ *     observer knew nothing about. It now re-subscribes on every route change.
  *
  * Uses a thin horizontal "band" near the top of the viewport (via a large
- * negative rootMargin) rather than requiring 50% of the section itself to be
- * visible. The old threshold-based approach only works for sections shorter
- * than the viewport — any section taller than ~2x the viewport height
- * (Projects, Skills, Contact) could never reach 50% visibility while
- * scrolling through it, so the nav link would silently stop updating.
+ * negative rootMargin) rather than requiring a share of the section itself to
+ * be visible, so it also works for sections much taller than the viewport.
  */
 export function useActiveSection() {
-  const [activeId, setActiveId] = useState(null);
+  const { pathname } = useLocation();
+  // Store the route alongside the id: an id observed on a previous route is
+  // ignored automatically, so no synchronous reset inside the effect is needed.
+  const [active, setActive] = useState({ path: null, id: null });
 
   useEffect(() => {
-    const sections = Array.from(document.querySelectorAll('main[id], section[id]'));
-    if (!('IntersectionObserver' in window) || !sections.length) return;
+    const sections = Array.from(document.querySelectorAll('main section[id]'));
+    if (!('IntersectionObserver' in window) || !sections.length) return undefined;
 
     const order = sections.map(section => section.id);
     const visible = new Set();
@@ -29,11 +40,13 @@ export function useActiveSection() {
           else visible.delete(id);
         });
 
-        // Pick the topmost section (in document order) that currently
-        // intersects the band, so the result is stable even when two
-        // sections' edges both cross it in the same frame.
-        const next = order.find(id => visible.has(id));
-        if (next) setActiveId(next);
+        // When two neighbouring sections touch the band at once (always the
+        // case right after clicking a nav link: the previous section's bottom
+        // edge and the target's top edge sit on the same pixel) the LOWER one
+        // is the one the visitor is heading to — so take the last visible
+        // section in document order.
+        const next = [...order].reverse().find(id => visible.has(id));
+        if (next) setActive({ path: pathname, id: next });
       },
       // Shrink the observed viewport to a thin strip just below the fixed
       // navbar; a section is "active" once it crosses that strip.
@@ -41,7 +54,7 @@ export function useActiveSection() {
     );
     sections.forEach(section => observer.observe(section));
     return () => observer.disconnect();
-  }, []);
+  }, [pathname]);
 
-  return activeId;
+  return active.path === pathname ? active.id : null;
 }

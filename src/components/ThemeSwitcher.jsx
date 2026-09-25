@@ -68,6 +68,9 @@ export default function ThemeSwitcher() {
         id="themePanel"
         role="group"
         aria-label="Theme color options"
+        // Closed panel is only faded out; `inert` also removes it from the tab
+        // order so keyboard users don't land on invisible buttons.
+        inert={!open}
       >
         <span className="theme-panel-label">Appearance</span>
         <div

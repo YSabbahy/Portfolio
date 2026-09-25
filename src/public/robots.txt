@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://ysabbahy.github.io/Portfolio/sitemap.xml

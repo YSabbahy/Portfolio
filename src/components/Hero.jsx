@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { prefersReducedMotion } from "../hooks/mediaFlags";
+import { useHieroglyphDecode } from "../hooks/useHieroglyphDecode";
 import { usePortraitTilt } from "../hooks/usePortraitTilt";
 import MagneticButton from "./MagneticButton";
 
@@ -60,9 +61,13 @@ function useCycleWord() {
 export default function Hero() {
   const { word, caretBlink } = useCycleWord();
   const { wrapRef, frameRef, onMouseEnter, onMouseMove, onMouseLeave } = usePortraitTilt();
+  // One-time, load-only moment: the two static headline words decode out of
+  // hieroglyphs before the cycling word's typewriter takes over.
+  const frontEnd = useHieroglyphDecode("Front-end", { delay: 550, speed: 45 });
+  const portfolio = useHieroglyphDecode("Portfolio", { delay: 850, speed: 45 });
 
   return (
-    <main
+    <section
       id="home"
       className="pt-36 pb-20 px-6 md:px-16 max-w-7xl mx-auto relative z-10 min-h-screen flex items-center"
     >
@@ -74,9 +79,13 @@ export default function Hero() {
           </div>
           <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-tight">
             <span className="headline-row">
-              <span className="headline-word" style={{ "--i": 0 }}>
-                Front-end
-              </span>{" "}
+              <span
+                aria-hidden="true"
+                className={`hg-decode${frontEnd.done ? "" : " is-decoding"}`}
+              >
+                {frontEnd.display}
+              </span>
+              <span className="sr-only">Front-end </span>{" "}
               <span
                 aria-hidden="true"
                 className={`headline-word${caretBlink ? " caret-blink" : ""}`}
@@ -89,11 +98,16 @@ export default function Hero() {
             </span>
             <span className="headline-row">
               <span
-                className="headline-word text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-400"
-                style={{ "--i": 2 }}
+                aria-hidden="true"
+                className={`hg-decode${
+                  portfolio.done
+                    ? " text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-400"
+                    : " is-decoding"
+                }`}
               >
-                Portfolio
+                {portfolio.display}
               </span>
+              <span className="sr-only">Portfolio</span>
             </span>
           </h1>
           <p className="hero-copy text-lg text-gray-400 max-w-xl leading-relaxed">
@@ -137,6 +151,8 @@ export default function Hero() {
                   height="964"
                   loading="eager"
                   src={`${import.meta.env.BASE_URL}images/profile-cutout.webp`}
+                  srcSet={`${import.meta.env.BASE_URL}images/profile-cutout-640.webp 640w, ${import.meta.env.BASE_URL}images/profile-cutout.webp 900w`}
+                  sizes="(min-width: 1024px) 448px, 90vw"
                   width="900"
                 />
               </div>
@@ -152,6 +168,6 @@ export default function Hero() {
           </div>
         </div>
       </div>
-    </main>
+    </section>
   );
 }

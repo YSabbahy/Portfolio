@@ -7,17 +7,22 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint src",
-    "preview": "vite preview"
+    "preview": "vite preview --port 4173 --strictPort",
+    "test:e2e:run": "python3 tests/e2e.py && python3 tests/e2e2.py",
+    "test:e2e": "start-server-and-test preview http://localhost:4173/Portfolio/ test:e2e:run"
   },
   "dependencies": {
+    "prism-react-renderer": "^2.4.1",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
     "oxlint": "^1.79.0",
+    "start-server-and-test": "^2.1.2",
     "vite": "^8.2.2"
   }
 }
